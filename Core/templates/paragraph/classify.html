@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <h2 class="mb-4 mt-2">严肃性判别</h2>
+  <form method="post">
+    <div class="form-group">
+      <textarea class="form-control" name="content" value="{{ content_init }}" 
+        rows="3" placeholder="输入要判别的文字"></textarea>
+    </div>
+    <div class="row">
+      <div class="col-12 w-100 d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary mr-2">提交</button>
+        <button type="submit" class="btn btn-secondary">重置</button>
+      </div>
+    </div>
+  </form>
+  <h3>判别结果</h3>
+  <hr>
+  {% if has_content %}
+  <div class="row">
+    <div class="col-4" id="pie" style="height: 350px; width: 400px;"></div>
+    <script type="text/javascript">
+      var myChart = echarts.init(document.getElementById('pie'));
+      var s_ratio = {{ serious_ratio | safe }};
+      var a_ratio = {{ amusing_ratio | safe }};
+      var option = {
+        series : [
+          {
+            name: '判别结果',
+            type: 'pie',
+            radius: '60%',
+            data: [
+              {value:s_ratio, name:'Serious'},
+              {value:a_ratio, name:'Amusing'}
+            ]
+          }
+        ]
+      };
+      myChart.setOption(option);
+      Window.onresize = function () {
+        myChart.resize();
+      }
+    </script>
+    <div class="col-8">
+      <h4 class="mt-2">文段</h4>
+      <p class="jumbotron mt-2" style="padding: 20px; margin: 20px 0px 20px 0px;">
+        {{ content }}</p>
+      {% if serious_ratio > amusing_ratio %}
+      <p class="text-dark" style="margin-bottom: 8px;">
+        为严肃性文字的概率为：{{ '%.3f%%' | format(serious_ratio * 100) }}</p>
+      <p class="text-muted" style="margin-bottom: 8px;">
+        为娱乐性文字的概率为：{{ '%.3f%%' | format(amusing_ratio * 100) }}</p>
+      {% else %}
+      <p class="text-muted" style="margin-bottom: 8px;">
+        为严肃性文字的概率为：{{ '%.3f%%' | format(serious_ratio * 100) }}</p>
+      <p class="text-dark" style="margin-bottom: 8px;">
+        为娱乐性文字的概率为：{{ '%.3f%%' | format(amusing_ratio * 100) }}</p>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <p class="text-muted">无文字输入</p>
+  {% endif %}
+</div>
+{% endblock %}
